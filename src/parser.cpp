@@ -266,14 +266,21 @@ parse_result parse(std::span<const std::byte> input, const parse_options& option
 {
     parser_context ctx{input, options};
     ast result = parse_ast(ctx);
-    return {result, ctx.diags_};
+    return {std::move(result), std::move(ctx.diags_)};
 }
 
 
 parse_result parse_file(std::string_view filename, const parse_options& options)
 {
-    // TODO: Memeory map the file and pass the data to parse()
-    return parse({}, options);
+    auto mapped = map_file(filename);
+    if (!mapped)
+    {
+        diagnostics diags;
+        error(diags, "Failed to open file", {{0, 0}, {0, 0}});
+        return {std::nullopt, std::move(diags)};
+    }
+
+    return parse(mapped->data(), options);
 }
 
 }
