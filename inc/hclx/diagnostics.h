@@ -22,9 +22,19 @@ namespace hclx
     return false;
 }
 
+inline void error(diagnostics& diags, std::string message, source_range where)
+{
+    diags.items.push_back({serverity::error, where, std::move(message)});
+}
+
 inline void error(diagnostics& diags, std::string_view message, source_range where)
 {
-    diags.items.push_back({serverity::error, where, message});
+    error(diags, std::string{ message }, where);
+}
+
+inline void error(diagnostics& diags, const char* message, source_range where)
+{
+    error(diags, std::string{ message }, where);
 }
 
 }

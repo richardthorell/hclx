@@ -1,7 +1,6 @@
 #pragma once
 
-#include <byte>
-#include <span>
+#include <hclx/types.h>
 
 namespace hclx
 {

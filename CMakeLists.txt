@@ -1,4 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
+
+if (POLICY CMP0135)
+  cmake_policy(SET CMP0135 NEW)
+endif()
+
 project(HCLX LANGUAGES CXX)
 
 option(HCLX_BUILD_TESTS "Build HCLX unit tests" ON)
@@ -7,12 +12,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Pick up all .cpp in src/
-file(GLOB CONFIGURE_DEPENDS HCLX_SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+add_library(hclx STATIC
+    src/lexer.cpp
+    src/mapped_file.cpp
+    src/parser.cpp
 )
-
-add_library(hclx STATIC ${HCLX_SOURCES})
 
 target_include_directories(hclx
     PUBLIC

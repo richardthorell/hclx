@@ -41,7 +41,6 @@ struct lexer
 
     void consume_token() noexcept;
 
-private:
     std::span<const std::byte> input_;
     const parse_options& options_;
     diagnostics& diags_;

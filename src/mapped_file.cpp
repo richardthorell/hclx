@@ -1,5 +1,11 @@
 #include "mapped_file.h"
 
+#if defined(_WIN32)
+#include <windows.h>
+#else
+// TODO: Add includes
+#endif
+
 namespace hclx
 {
 mapped_file::~mapped_file()
@@ -43,7 +49,7 @@ std::optional<mapped_file> map_file(std::string_view filename)
         return std::nullopt;
     }
 
-    void* data = MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, 0);
+    void* data = MapViewOfFile(result.mapping_, FILE_MAP_READ, 0, 0, 0);
     if (!data)
     {
         CloseHandle(result.mapping_);

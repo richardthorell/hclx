@@ -1,3 +1,7 @@
+#include <hclx/diagnostics.h>
+
+#include <charconv>
+
 #include "lexer.h"
 
 namespace hclx
@@ -155,7 +159,7 @@ static token lex_ident(lexer& lx)
     {
         token_kind::ident,
         {pos, lx.position_},
-        std::string_view(reinterpret_cast<const char*>(lx.input_.data() + idx), lx.index_ - idx)
+        std::string{reinterpret_cast<const char*>(lx.input_.data() + idx), lx.index_ - idx}
     };
 }
 
@@ -197,7 +201,7 @@ static token lex_string(lexer& lx)
                 case '{': out.push_back('{'); break;
                 case '}': out.push_back('}'); break;
                 default:
-                    error(lx.diags_, "Invalid escape sequence", {{pos, lx.position_}});
+                    error(lx.diags_, "Invalid escape sequence", {pos, lx.position_});
                     break;
             }
 
@@ -272,7 +276,7 @@ static token lex_number(lexer& lx)
         }
         else
         {
-            error(lx.diags_, "Invalid exponent in number literal", {{pos, lx.position_}});
+            error(lx.diags_, "Invalid exponent in number literal", {pos, lx.position_});
 
             // Roll back to before the exponent
             lx.index_ = exp_idx;
@@ -282,7 +286,7 @@ static token lex_number(lexer& lx)
 
     if (!saw_digit)
     {
-        error(lx.diags_, "Invalid number literal", {{pos, lx.position_}});
+        error(lx.diags_, "Invalid number literal", {pos, lx.position_});
         return {token_kind::integer, {pos, lx.position_}, 0};
     }
 
@@ -294,7 +298,7 @@ static token lex_number(lexer& lx)
         auto fc = std::from_chars(num_str.data(), num_str.data() + num_str.size(), value);
         if (fc.ec != std::errc())
         {
-            error(lx.diags_, "Floating-point literal out of range", {{pos, lx.position_}});
+            error(lx.diags_, "Floating-point literal out of range", {pos, lx.position_});
         }
 
         return {token_kind::floating, {pos, lx.position_}, value};
@@ -305,7 +309,7 @@ static token lex_number(lexer& lx)
         auto fc =  std::from_chars(num_str.data(), num_str.data() + num_str.size(), value);
         if (fc.ec != std::errc())
         {
-            error(lx.diags_, "Integer literal out of range", {{pos, lx.position_}});
+            error(lx.diags_, "Integer literal out of range", {pos, lx.position_});
         }
 
         return {token_kind::integer, {pos, lx.position_}, value};
@@ -355,7 +359,7 @@ static token lex_one(lexer& lx)
     }
 
     advance(lx);
-    error(lx.diags_, "Unexpected character", {{pos, lx.position_}});
+    error(lx.diags_, "Unexpected character", {pos, lx.position_});
 
     return {token_kind::eof, {pos, lx.position_}, std::monostate{}};
 }

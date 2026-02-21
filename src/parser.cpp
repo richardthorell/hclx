@@ -1,4 +1,9 @@
+#include <hclx/types.h>
+#include <hclx/diagnostics.h>
+#include <hclx/parser.h>
+
 #include "lexer.h"
+#include "mapped_file.h"
 
 namespace hclx
 {
@@ -18,7 +23,7 @@ struct parser_context
 
 [[nodiscard]] inline source_position end_of_block_item(const block_item& blk) noexcept
 {
-    return std::apply([](const auto& item) { return item.where.end; }, blk.item);
+    return std::visit([](const auto& item) { return item.where.end; }, blk.item);
 }
 
 [[nodiscard]] inline token peek_token(parser_context& ctx)
@@ -105,16 +110,18 @@ static block_item parse_item(parser_context& ctx)
 
     if (peek_token(ctx).kind == token_kind::equal)
     {
+        auto result = parse_attribute(ctx, std::move(std::get<std::string>(id.value)), pos);
         return block_item{
-            parse_attribute(ctx, std::move(id.text)),
-            {pos, end_of_block_item(result)}
+            std::move(result),
+            {pos, result.where.end}
         };
     }
     else
     {
+        auto result = parse_block(ctx, std::move(std::get<std::string>(id.value)), pos);
         return block_item{
-            parse_block(ctx, std::move(id.text)),
-            {pos, end_of_block_item(result)}
+            std::move(result),
+            {pos, result.where.end}
         };
     }
 }
@@ -141,7 +148,7 @@ static block parse_block(parser_context& ctx, std::string type, source_position 
 
         if (peek_token(ctx).kind == token_kind::lbrace)
         {
-            result.label = std::move(label.text);
+            result.label = std::move(std::get<std::string>(label.value));
         }
         else
         {
@@ -177,30 +184,39 @@ static expression parse_expression(parser_context& ctx)
     {
         case token_kind::string:
             tok = next_token(ctx);
-            return expression{std::move(tok.text), tok.where};
+            return expression{std::move(std::get<std::string>(tok.value)), tok.where};
+
         case token_kind::integer:
             tok = next_token(ctx);
             return expression{std::get<int64_t>(tok.value), tok.where};
+
         case token_kind::floating:
             next_token(ctx);
             return expression{std::get<double>(tok.value), tok.where};
+
         case token_kind::ident:
+        {
             tok = next_token(ctx);
-            if (tok.text == "true")
-                return expression{true, tok.where};
-            else if (tok.text == "false")
-                return expression{false, tok.where};
-            else if (tok.text == "null")
-                return expression{nullptr, tok.where};
+            const auto& ident = std::get<std::string>(tok.value);
+            if (ident == "true")
+                return expression{ true, tok.where };
+            else if (ident == "false")
+                return expression{ false, tok.where };
+            else if (ident == "null")
+                return expression{ nullptr, tok.where };
             else
             {
                 error(ctx.diags_, "Unexpected identifier in expression", tok.where);
-                return expression{nullptr, tok.where};
+                return expression{ nullptr, tok.where };
             }
+        }
+
         case token_kind::lbracket:
             return parse_array(ctx);
+
         case token_kind::lbrace:
             return parse_object(ctx);
+
         default:
             error_here(ctx, "Unexpected token in expression");
             consume_token(ctx);
@@ -244,7 +260,7 @@ static expression parse_object(parser_context& ctx)
         expect_token(ctx, token_kind::equal, "Expected '=' after object key");
         expression value = parse_expression(ctx);
 
-        object.emplace(std::move(key.text), std::move(value));
+        object.emplace(std::move(std::get<std::string>(key.value)), std::move(value));
 
         if (peek_token(ctx).kind == token_kind::comma)
         {

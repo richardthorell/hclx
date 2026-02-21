@@ -1,7 +1,10 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <string>
+#include <span>
 #include <unordered_map>
 #include <variant>
 #include <vector>
@@ -60,7 +63,44 @@ struct expression
         std::unordered_map<std::string, expression>
     >;
 
-    constexpr expression() noexcept : value(nullptr) {}
+    constexpr expression() noexcept
+        : value{ nullptr }
+    {}
+
+    constexpr expression(std::nullptr_t, source_range w) noexcept
+        : value{ nullptr }
+        , where{w}
+    {}
+    
+    constexpr expression(bool v, source_range w) noexcept
+        : value{v}
+        , where{w}
+    {}
+
+    constexpr expression(int64_t v, source_range w) noexcept
+        : value{v}
+        , where{w}
+    {}
+
+    constexpr expression(double v, source_range w) noexcept
+        : value{v}
+        , where{w}
+    {}
+
+    expression(std::string v, source_range w)
+        : value{std::move(v)}
+        , where{w}
+    {}
+
+    expression(std::vector<expression> v, source_range w)
+        : value{std::move(v)}
+        , where{w}
+    {}
+
+    expression(std::unordered_map<std::string, expression> v, source_range w)
+        : value{std::move(v)}
+        , where{w}
+    {}
 
     data_type value;
     source_range where;
@@ -73,13 +113,7 @@ struct attribute
     source_range where;
 };
 
-struct block;
-
-struct block_item
-{
-    std::variant<attribute, block> item;
-    source_range where;
-};
+struct block_item;
 
 struct block
 {
@@ -89,9 +123,23 @@ struct block
     source_range where;
 };
 
+struct block_item
+{
+    std::variant<attribute, block> item;
+    source_range where;
+};
+
 struct ast
 {
     std::vector<block_item> items;
+};
+
+struct parse_options
+{
+    bool allow_optional_block_labels = true;
+    bool allow_trailing_commas = false;
+    bool allow_hash_comments = false;
+    bool allow_slash_comments = false;
 };
 
 }
