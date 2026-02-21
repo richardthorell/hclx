@@ -54,20 +54,18 @@ The library builds as a static library by default.
 
 ```cpp
 #include <hclx/parser.h>
-#include <string>
+#include <string_view>
 
 int main()
 {
-    std::string input = R"(
+    constexpr std::string_view input = R"(
         server "api" {
             port = 8080
             enabled = true
         }
     )";
 
-    auto result = hclx::parse(
-        std::as_bytes(std::span(input))
-    );
+    auto result = hclx::parse(input);
 
     if (!result.ast)
     {
@@ -98,9 +96,17 @@ int main()
 ### Entry Points
 
 ```cpp
+// Parse in memory data
 hclx::parse(std::span<const std::byte> input,
             hclx::parse_options options = {});
 
+hclx::parse(const char* data, std::size_t size,
+            hclx::parse_options options = {});
+
+hclx::parse(std::string_view input,
+            hclx::parse_options options = {});
+
+// Parse from a file path
 hclx::parse_file(std::string_view filename,
                  hclx::parse_options options = {});
 ```
