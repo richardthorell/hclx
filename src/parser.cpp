@@ -285,6 +285,15 @@ parse_result parse(std::span<const std::byte> input, const parse_options& option
     return {std::move(result), std::move(ctx.diags_)};
 }
 
+parse_result parse(std::string_view str, const parse_options& options)
+{
+    return parse(std::as_bytes(std::span{str}), options);
+}
+
+parse_result parse(const char *str, std::size_t size, const parse_options& options)
+{
+    return parse(std::string_view{str, size}, options);
+}
 
 parse_result parse_file(std::string_view filename, const parse_options& options)
 {
