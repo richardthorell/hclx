@@ -66,7 +66,7 @@ struct source_range
 /**
  * @brief Severity level of a diagnostic message.
  */
-enum class serverity : uint8_t
+enum class severity : uint8_t
 {
     error,   ///< Parsing or lexical error.
     warning, ///< Non-fatal issue.
@@ -84,7 +84,7 @@ struct diagnostic
     /**
      * @brief Severity classification of the diagnostic.
      */
-    serverity severity = serverity::error;
+    severity severity = severity::error;
 
     /**
      * @brief Source range associated with the diagnostic.

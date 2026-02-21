@@ -46,7 +46,7 @@ namespace hclx
 {
     for (const auto& diag : diags.items)
     {
-        if (diag.severity == serverity::error)
+        if (diag.severity == severity::error)
             return true;
     }
 
@@ -68,7 +68,7 @@ namespace hclx
  */
 inline void error(diagnostics& diags, std::string message, source_range where)
 {
-    diags.items.push_back({serverity::error, where, std::move(message)});
+    diags.items.push_back({severity::error, where, std::move(message)});
 }
 
 
