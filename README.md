@@ -1,5 +1,7 @@
 # hclx
 
+![CI](https://github.com/richardthorell/hclx/actions/workflows/ci.yml/badge.svg)
+
 hclx is a modern C++20 library for parsing a focused, well defined subset of HashiCorp Configuration Language (HCL). It is designed for embedding into systems software, tooling, game engines, build systems, and other performance sensitive environments.
 
 The library emphasizes:
