@@ -111,4 +111,5 @@ parse_result parse(const char* str,  std::size_t size, const parse_options& opti
  * @return parse_result containing the AST on success and diagnostics.
  */
 parse_result parse_file(std::string_view filename, const parse_options& options = {});
+
 }
